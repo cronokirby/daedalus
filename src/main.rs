@@ -1,10 +1,8 @@
 extern crate image;
-use image::{GenericImage, Pixel};
 extern crate minifb;
 use minifb::{Key, Scale, Window, WindowOptions};
 
 mod tiles;
-use tiles::{TileGrid};
 mod game;
 use game::{Game};
 

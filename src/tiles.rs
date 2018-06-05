@@ -26,14 +26,6 @@ impl TileGrid {
         }
     }
 
-    pub fn get(&self, row: usize, column: usize) -> &Tile {
-        &self.tiles[row * self.width + column]
-    }
-
-    pub fn set(&mut self, row: usize, column: usize, t: Tile) {
-        self.tiles[row * self.width + column] = t;
-    }
-
     /// Writes all the tiles to a mutable buffer.
     /// The buffer must be large enough to contain all the pixels.
     pub fn write_to(&self, tilemap: &HashMap<Tile, [u32; 32 * 32]>, buffer: &mut [u32]) {
