@@ -1,14 +1,14 @@
 /// Used to represent a single tile
 #[derive(Clone)]
 pub enum Tile {
-    Black,
-    White
+    Wall,
+    Floor
 }
 
 pub fn tile_pixels(t: &Tile) -> &[u32] {
     match t {
-        Tile::White => &[0xFF_FF_FF_FF; 32 * 32],
-        Tile::Black => &[0; 32 * 32]
+        Tile::Floor => &[0xFF_FF_FF_FF; 32 * 32],
+        Tile::Wall => &[0; 32 * 32]
     }
 }
 
@@ -23,7 +23,7 @@ pub struct TileMap {
 impl TileMap {
     pub fn new(width: usize, height: usize) -> Self {
         TileMap {
-            tiles: vec![Tile::Black; width * height],
+            tiles: vec![Tile::Wall; width * height],
             width: width,
             height: height,
             size: 32
@@ -38,6 +38,8 @@ impl TileMap {
         self.tiles[row * self.width + column] = t;
     }
 
+    /// Writes all the tiles to a mutable buffer.
+    /// The buffer must be large enough to contain all the pixels.
     pub fn write_to(&self, buffer: &mut [u32]) {
         for r in 0..self.height {
             for c in 0..self.width {

@@ -11,7 +11,7 @@ fn main() {
     const HEIGHT: usize = 30 * 32;
     let mut buffer = vec![0; WIDTH * HEIGHT];
     let mut tiles = TileMap::new(40, 30);
-    tiles.set(0, 0, tiles::Tile::White);
+    tiles.set(0, 0, tiles::Tile::Floor);
     tiles.write_to(&mut buffer);
     let mut window = Window::new(
         "Test - ESC to exit",
