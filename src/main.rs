@@ -14,7 +14,7 @@ fn main() {
     let mut buffer = vec![0; WIDTH * HEIGHT];
     let mut game = Game::new(20, 15);
     let mut window_opts = WindowOptions::default();
-    window_opts.scale = Scale::X2;
+    window_opts.scale = Scale::FitScreen;
     let mut window = Window::new(
         "Daedalus",
         WIDTH,
