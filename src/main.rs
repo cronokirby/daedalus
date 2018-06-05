@@ -1,18 +1,25 @@
+extern crate image;
+use image::{GenericImage, Pixel};
 extern crate minifb;
-
 use minifb::{Key, WindowOptions, Window};
 
 mod tiles;
-use tiles::{TileMap};
+use tiles::{TileGrid};
+mod game;
+use game::{Game};
+
 
 
 fn main() {
     const WIDTH: usize = 40 * 32;
     const HEIGHT: usize = 30 * 32;
     let mut buffer = vec![0; WIDTH * HEIGHT];
-    let mut tiles = TileMap::new(40, 30);
+    /*
+    let mut tiles = TileGrid::new(40, 30);
     tiles.set(0, 0, tiles::Tile::Floor);
-    tiles.write_to(&mut buffer);
+    tiles.write_to(&mut buffer);*/
+    let game = Game::new(40, 30);
+    game.write_to(&mut buffer);
     let mut window = Window::new(
         "Test - ESC to exit",
         WIDTH,
