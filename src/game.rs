@@ -3,6 +3,9 @@ use std::collections::HashMap;
 extern crate image;
 use image::{GenericImage, Pixel};
 
+extern crate minifb;
+use minifb::{Key};
+
 use tiles::{Tile, TileGrid};
 
 /// Reads an image from a path into a buffer.
@@ -41,11 +44,39 @@ impl SpriteData {
 }
 
 
+#[derive(Clone, Copy, Debug)]
+enum Direction {
+    U,
+    D,
+    L,
+    R
+}
+
+/// Checks if a position can move in a direction given min and max bounds
+fn valid_move(pos: (usize, usize), min: (usize, usize), max: (usize, usize), dir: Direction) -> bool {
+    match dir {
+        Direction::L => pos.1 >= min.1,
+        Direction::R => pos.1 <= max.1,
+        Direction::U => pos.0 >= min.0,
+        Direction::D => pos.0 <= max.0
+    }
+}
+
+fn move_dir(pos: &mut (usize, usize), dir: Direction) {
+    match dir {
+        Direction::L => pos.1 -= 1,
+        Direction::R => pos.1 += 1,
+        Direction::U => pos.0 -= 1,
+        Direction::D => pos.0 += 1
+    }
+}
+
+
 /// Contains all necessary information for the Game State
 pub struct Game {
-    /// The current position of the player
+    /// The current position of the player, row column
     player_pos: (usize, usize),
-    /// The bounds (width, height) of the world.
+    /// The bounds (rows, columns) of the world.
     /// All entities must always be contained in this.
     world_bounds: (usize, usize),
     /// The grid containing all background tiles
@@ -53,9 +84,10 @@ pub struct Game {
     /// Mapping each sprite to sprite information
     sprite_data: SpriteData,
     /// The size for every sprite
-    sprite_size: usize
+    sprite_size: usize,
+    /// Used for delaying updates while animations transitions
+    transition: i32
 }
-
 
 impl Game {
     pub fn new(width: usize, height: usize) -> Self {
@@ -63,13 +95,45 @@ impl Game {
         let sprite_d = SpriteData::from_files();
         Game {
             player_pos: (0, 0),
-            world_bounds: (width, height),
+            world_bounds: (height, width),
             grid: grid,
             sprite_data: sprite_d,
-            sprite_size: 32
+            sprite_size: 32,
+            transition: 0
         }
     }
 
+    pub fn update(&mut self, keys: &[Key]) {
+        // don't update at all if we're transitioning
+        if self.transition > 0 {
+            self.transition -= 1;
+            return
+        }
+        let mut dir = None;
+        for key in keys {
+            match key {
+                Key::Left => {
+                    dir = Some(Direction::L);
+                }
+                Key::Right => {
+                    dir = Some(Direction::R);
+                }
+                Key::Down => {
+                    dir = Some(Direction::D);
+                }
+                Key::Up => {
+                    dir = Some(Direction::U);
+                }
+                _ => {}
+            }
+        }
+        if let Some(d) = dir {
+            if valid_move(self.player_pos, (0, 0), self.world_bounds, d) {
+                move_dir(&mut self.player_pos, d);
+                self.transition = 6;
+            }
+        }
+    }
 
     pub fn write_to(&self, buffer: &mut [u32]) {
         // Render all the tiles
