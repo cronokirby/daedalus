@@ -29,7 +29,7 @@ struct SpriteData {
 
 impl SpriteData {
     fn from_files() -> Self {
-        let player = read_image("assets/P.png");
+        let player = read_image("assets/player.png");
         let mut tiles = HashMap::new();
         tiles.insert(Tile::Floor, [0xFF_FF_FF_FF; 32 * 32]);
         tiles.insert(Tile::Wall, [0xFF_00_00_00; 32 * 32]);
