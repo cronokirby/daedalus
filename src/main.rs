@@ -1,6 +1,6 @@
 extern crate image;
 extern crate minifb;
-use minifb::{Key, Scale, Window, WindowOptions};
+use minifb::{Key, Window, WindowOptions};
 
 mod tiles;
 mod game;
@@ -9,12 +9,11 @@ use game::{Game};
 
 
 fn main() {
-    const WIDTH: usize = 20 * 32;
-    const HEIGHT: usize = 15 * 32;
+    const WIDTH: usize = 40 * 32;
+    const HEIGHT: usize = 30 * 32;
     let mut buffer = vec![0; WIDTH * HEIGHT];
-    let mut game = Game::new(20, 15);
-    let mut window_opts = WindowOptions::default();
-    window_opts.scale = Scale::FitScreen;
+    let mut game = Game::new(40, 30);
+    let window_opts = WindowOptions::default();
     let mut window = Window::new(
         "Daedalus",
         WIDTH,

@@ -26,20 +26,26 @@ impl TileGrid {
         }
     }
 
+    /// Writes a single tile to a buffer
+    pub fn write_pos(&self, tilemap: &HashMap<Tile, [u32; 32 * 32]>, pos: (usize, usize), buffer: &mut [u32]) {
+        let (r, c) = pos;
+        let tile = &self.tiles[r * self.width + c];
+        let arr = tilemap[tile];
+        let base_r = r * self.size;
+        let base_c = c * self.size;
+        for rt in 0..self.size {
+            for ct in 0..self.size {
+                buffer[(base_r + rt) * self.width * self.size + base_c + ct] = arr[rt * self.size + ct];
+            }
+        }
+    }
+
     /// Writes all the tiles to a mutable buffer.
     /// The buffer must be large enough to contain all the pixels.
     pub fn write_to(&self, tilemap: &HashMap<Tile, [u32; 32 * 32]>, buffer: &mut [u32]) {
         for r in 0..self.height {
             for c in 0..self.width {
-                let tile = &self.tiles[r * self.width + c];
-                let arr = tilemap[tile];
-                let base_r = r * self.size;
-                let base_c = c * self.size;
-                for rt in 0..self.size {
-                    for ct in 0..self.size {
-                        buffer[(base_r + rt) * self.width * self.size + base_c + ct] = arr[rt * self.size + ct];
-                    }
-                }
+                self.write_pos(tilemap, (r, c), buffer);
             }
         }
     }

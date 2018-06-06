@@ -76,6 +76,10 @@ fn move_dir(pos: &mut (usize, usize), dir: Direction) {
 pub struct Game {
     /// The current position of the player, row column
     player_pos: (usize, usize),
+    /// The last player pos, used to write over movement
+    /// Also indicates whether a new dungeon has been generated,
+    /// None is so
+    last_player_pos: Option<(usize, usize)>,
     /// The bounds (rows, columns) of the world.
     /// All entities must always be contained in this.
     world_bounds: (usize, usize),
@@ -95,6 +99,7 @@ impl Game {
         let sprite_d = SpriteData::from_files();
         Game {
             player_pos: (0, 0),
+            last_player_pos: None, // this can be anything, except (0, 0)
             world_bounds: (height - 1, width - 1),
             grid: grid,
             sprite_data: sprite_d,
@@ -129,15 +134,18 @@ impl Game {
         }
         if let Some(d) = dir {
             if valid_move(self.player_pos, (0, 0), self.world_bounds, d) {
+                self.last_player_pos = Some(self.player_pos);
                 move_dir(&mut self.player_pos, d);
-                self.transition = 6;
+                self.transition = 15;
             }
         }
     }
 
     pub fn write_to(&self, buffer: &mut [u32]) {
-        // Render all the tiles
-        self.grid.write_to(&self.sprite_data.tiles, buffer);
+        // Render all the tiles if we're in a new area
+        if let None = self.last_player_pos {
+            self.grid.write_to(&self.sprite_data.tiles, buffer);
+        }
         // Render the player
         let player_sprite = &self.sprite_data.player;
         let (py, px) = self.player_pos;
@@ -152,6 +160,10 @@ impl Game {
                            + base_c + c] = color
                 }
             }
+        }
+        // Render over the player's last position
+        if let Some(pos) = self.last_player_pos {
+            self.grid.write_pos(&self.sprite_data.tiles, pos, buffer);
         }
     }
 }
