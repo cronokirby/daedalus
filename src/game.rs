@@ -55,10 +55,10 @@ enum Direction {
 /// Checks if a position can move in a direction given min and max bounds
 fn valid_move(pos: (usize, usize), min: (usize, usize), max: (usize, usize), dir: Direction) -> bool {
     match dir {
-        Direction::L => pos.1 >= min.1,
-        Direction::R => pos.1 <= max.1,
-        Direction::U => pos.0 >= min.0,
-        Direction::D => pos.0 <= max.0
+        Direction::L => pos.1 > min.1,
+        Direction::R => pos.1 < max.1,
+        Direction::U => pos.0 > min.0,
+        Direction::D => pos.0 < max.0
     }
 }
 
@@ -95,7 +95,7 @@ impl Game {
         let sprite_d = SpriteData::from_files();
         Game {
             player_pos: (0, 0),
-            world_bounds: (height, width),
+            world_bounds: (height - 1, width - 1),
             grid: grid,
             sprite_data: sprite_d,
             sprite_size: 32,
