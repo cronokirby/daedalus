@@ -27,15 +27,16 @@ fn read_image(path: &str) -> Vec<u32> {
 /// Contains all the necessary info for sprites in the game.
 struct SpriteData {
     player: Vec<u32>,
-    tiles: HashMap<Tile, [u32; 32 * 32]>
+    tiles: HashMap<Tile, Vec<u32>>
 }
 
 impl SpriteData {
     fn from_files() -> Self {
         let player = read_image("assets/player.png");
+        let floortile = read_image("assets/floortile.png");
         let mut tiles = HashMap::new();
-        tiles.insert(Tile::Floor, [0xFF_FF_FF_FF; 32 * 32]);
-        tiles.insert(Tile::Wall, [0xFF_00_00_00; 32 * 32]);
+        tiles.insert(Tile::Floor, floortile);
+        tiles.insert(Tile::Wall, vec![0xFF_00_00_00; 32 * 32]);
         SpriteData {
             player: player,
             tiles: tiles
@@ -136,7 +137,7 @@ impl Game {
             if valid_move(self.player_pos, (0, 0), self.world_bounds, d) {
                 self.last_player_pos = Some(self.player_pos);
                 move_dir(&mut self.player_pos, d);
-                self.transition = 15;
+                self.transition = 25;
             }
         }
     }
