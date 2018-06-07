@@ -96,7 +96,7 @@ pub struct Game {
 
 impl Game {
     pub fn new(width: usize, height: usize) -> Self {
-        let grid = TileGrid::new(width, height);
+        let grid = TileGrid::random(width, height);
         let sprite_d = SpriteData::from_files();
         Game {
             player_pos: (0, 0),
@@ -137,7 +137,7 @@ impl Game {
             if valid_move(self.player_pos, (0, 0), self.world_bounds, d) {
                 self.last_player_pos = Some(self.player_pos);
                 move_dir(&mut self.player_pos, d);
-                self.transition = 25;
+                self.transition = 30;
             }
         }
     }

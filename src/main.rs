@@ -1,5 +1,6 @@
 extern crate image;
 extern crate minifb;
+extern crate rand;
 use minifb::{Key, Window, WindowOptions};
 
 mod tiles;
