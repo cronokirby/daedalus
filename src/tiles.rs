@@ -1,3 +1,4 @@
+use std::cmp::{min};
 use std::collections::HashMap;
 
 use rand::{thread_rng, Rng};
@@ -45,23 +46,27 @@ impl Room {
 fn random_tiles(width: usize, height: usize, max_attempts: i32) -> Vec<Tile> {
     let mut positions: Vec<(usize, usize)> = Vec::with_capacity(width * height);
     // We use these bounds to make sure that rooms don't touch the edges of walls
-    for r in 1..(height - 4) {
-        for c in 1..(width - 4) {
+    for r in 1..(height - 3) {
+        for c in 1..(width - 3) {
             positions.push((r, c));
         }
     }
     let mut attempts = max_attempts;
     let mut rooms: Vec<Room> = Vec::new();
     let mut rng = thread_rng();
+    let sizes: Vec<usize> = (0..7).collect();
     while attempts > 0 {
-        let start_pos = rng.choose(&positions).unwrap();
-        let room = Room::new(*start_pos, 4, 4);
-        let collided = rooms.iter().any(|r| r.collides_with(&room));
+        let &(r, c) = rng.choose(&positions).unwrap();
+        // Chooses room sizes between 3 and 7, but makes sure not to hit the edge
+        let w = *rng.choose(&sizes[3..min(7, width - c)]).unwrap();
+        let h = *rng.choose(&sizes[3..min(7, height - r)]).unwrap();
+        let room = Room::new((r, c), w, h);
+        let larger = Room::new((r - 1, c - 1), w + 2, h + 2);
+        let collided = rooms.iter().any(|r| r.collides_with(&larger));
         if collided {
             attempts -= 1;
         } else {
             rooms.push(room);
-            attempts -= 1;
         }
     }
     // Now we place the tiles
@@ -99,7 +104,7 @@ impl TileGrid {
 
     /// Generates a new TileGrid at random
     pub fn random(width: usize, height: usize) -> Self {
-        let v = random_tiles(width, height, 200);
+        let v = random_tiles(width, height, 1000);
         TileGrid {
             tiles: v,
             width: width,
