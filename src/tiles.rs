@@ -83,6 +83,59 @@ fn random_tiles(width: usize, height: usize, max_attempts: i32) -> Vec<Tile> {
     tiles
 }
 
+// the bounds here are strict, no tile can be placed there
+fn adjacent(pos: (usize, usize), bounds: (usize, usize)) -> Vec<(usize, usize)> {
+    let mut v = Vec::with_capacity(4);
+    let (r, c) = pos;
+    let (r_max, c_max) = bounds;
+    if r > 0 {
+        v.push((r - 1, c));
+    }
+    if c > 0 {
+        v.push((r, c - 1));
+    }
+    if r + 1 < r_max {
+        v.push((r + 1, c));
+    }
+    if c + 1 < c_max {
+        v.push((r, c + 1))
+    }
+    v
+}
+
+fn valid_tiles(pos: (usize, usize), bounds: (usize, usize), grid: &[Tile]) -> Vec<(usize, usize)> {
+    let width = bounds.1;
+    adjacent(pos, bounds).into_iter().filter(|p| {
+        // Any tile next to us that's already filled must be an already explored path,
+        // so we don't even consider them potential candidates
+        if grid[p.0 * width + p.1] == Tile::Wall {
+            let adjacent = adjacent(*p, bounds);
+            // We want to avoid joining tunnels accidentally
+            adjacent.into_iter().filter(|p| *p != pos).all(|(r, c)| grid[r * width + c] == Tile::Wall)
+        } else {
+            false
+        }
+    }).collect()
+}
+
+/// Generates a random maze
+fn random_maze(width: usize, height: usize) -> Vec<Tile> {
+    let mut tiles = vec![Tile::Wall; width * height];
+    let mut rng = thread_rng();
+    let mut stack: Vec<(usize, usize)> = Vec::new();
+    stack.push((0, 0));
+    while !stack.is_empty() {
+        // we can unwrap because we know that the stack isn't empty
+        let pos = stack.last().unwrap().clone();
+        tiles[pos.0 * width + pos.1] = Tile::Floor;
+        let valid = valid_tiles(pos, (height, width), &tiles);
+        match rng.choose(&valid) {
+            Some(new_pos) => { stack.push(*new_pos) }
+            None => { stack.pop(); }
+        }
+    }
+    tiles
+}
 
 /// Used to represent a tile map
 pub struct TileGrid {
@@ -104,7 +157,8 @@ impl TileGrid {
 
     /// Generates a new TileGrid at random
     pub fn random(width: usize, height: usize) -> Self {
-        let v = random_tiles(width, height, 1000);
+        //let v = random_tiles(width, height, 1000);
+        let v = random_maze(width, height);
         TileGrid {
             tiles: v,
             width: width,
