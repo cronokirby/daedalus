@@ -63,13 +63,15 @@ fn valid_move(pos: (usize, usize), min: (usize, usize), max: (usize, usize), dir
     }
 }
 
-fn move_dir(pos: &mut (usize, usize), dir: Direction) {
+fn move_dir(pos: (usize, usize), dir: Direction) -> (usize, usize) {
+    let mut pos = pos;
     match dir {
         Direction::L => pos.1 -= 1,
         Direction::R => pos.1 += 1,
         Direction::U => pos.0 -= 1,
         Direction::D => pos.0 += 1
     }
+    pos
 }
 
 
@@ -107,7 +109,7 @@ impl Game {
         }
         rng.shuffle(&mut positions);
         let player_pos = positions.into_iter()
-            .find(|(r, c)| grid.tiles[r * width + c] == Tile::Floor)
+            .find(|&(r, c)| grid.get((r, c)) == Tile::Floor)
             .unwrap(); // the map will always generate floor tiles
         Game {
             player_pos: player_pos,
@@ -146,9 +148,12 @@ impl Game {
         }
         if let Some(d) = dir {
             if valid_move(self.player_pos, (0, 0), self.world_bounds, d) {
-                self.last_player_pos = Some(self.player_pos);
-                move_dir(&mut self.player_pos, d);
-                self.transition = 30;
+                let new_pos = move_dir(self.player_pos, d);
+                if self.grid.get(new_pos) == Tile::Floor {
+                    self.last_player_pos = Some(self.player_pos);
+                    self.player_pos = move_dir(self.player_pos, d);
+                    self.transition = 30;
+                }
             }
         }
     }

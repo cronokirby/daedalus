@@ -182,4 +182,9 @@ impl TileGrid {
             }
         }
     }
+
+    /// Gets a single position
+    pub fn get(&self, pos: (usize, usize)) -> Tile {
+        self.tiles[pos.0 * self.width + pos.1].clone()
+    }
 }
