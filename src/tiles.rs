@@ -43,7 +43,7 @@ impl Room {
 /// Generate random tiles
 /// Max attempts controls density, more or less.
 /// It specifies how many times an overlap can fail before generation ends.
-fn random_tiles(width: usize, height: usize, max_attempts: i32) -> Vec<Tile> {
+fn random_tiles(width: usize, height: usize, max_attempts: i32, buffer: &mut [Tile]) {
     let mut positions: Vec<(usize, usize)> = Vec::with_capacity(width * height);
     // We use these bounds to make sure that rooms don't touch the edges of walls
     for r in 1..(height - 3) {
@@ -70,17 +70,15 @@ fn random_tiles(width: usize, height: usize, max_attempts: i32) -> Vec<Tile> {
         }
     }
     // Now we place the tiles
-    let mut tiles = vec![Tile::Wall; width * height];
     for room in &rooms {
         let (r0, c0) = room.top_left;
         let (rmax, cmax) = room.down_right;
         for r in r0..rmax {
             for c in c0..cmax {
-                tiles[r * width + c] = Tile::Floor;
+                buffer[r * width + c] = Tile::Floor;
             }
         }
     }
-    tiles
 }
 
 // the bounds here are strict, no tile can be placed there
@@ -118,11 +116,11 @@ fn valid_tiles(pos: (usize, usize), bounds: (usize, usize), grid: &[Tile]) -> Ve
     }).collect()
 }
 
-/// Generates a random maze
+/// Generates a random maze, through depth first search
 fn random_maze(width: usize, height: usize) -> Vec<Tile> {
     let mut tiles = vec![Tile::Wall; width * height];
     let mut rng = thread_rng();
-    let mut stack: Vec<(usize, usize)> = Vec::new();
+    let mut stack = Vec::new();
     stack.push((0, 0));
     while !stack.is_empty() {
         // we can unwrap because we know that the stack isn't empty
@@ -130,7 +128,9 @@ fn random_maze(width: usize, height: usize) -> Vec<Tile> {
         tiles[pos.0 * width + pos.1] = Tile::Floor;
         let valid = valid_tiles(pos, (height, width), &tiles);
         match rng.choose(&valid) {
+            // There are valid position lefts, and we start searching from that position
             Some(new_pos) => { stack.push(*new_pos) }
+            // There are no valid positions left, so we go back to the previous one
             None => { stack.pop(); }
         }
     }
@@ -146,19 +146,11 @@ pub struct TileGrid {
 }
 
 impl TileGrid {
-    pub fn new(width: usize, height: usize) -> Self {
-        TileGrid {
-            tiles: vec![Tile::Floor; width * height],
-            width: width,
-            height: height,
-            size: 32
-        }
-    }
-
     /// Generates a new TileGrid at random
     pub fn random(width: usize, height: usize) -> Self {
         //let v = random_tiles(width, height, 1000);
-        let v = random_maze(width, height);
+        let mut v = random_maze(width, height);
+        random_tiles(width, height, 100, &mut v);
         TileGrid {
             tiles: v,
             width: width,

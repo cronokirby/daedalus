@@ -34,9 +34,10 @@ impl SpriteData {
     fn from_files() -> Self {
         let player = read_image("assets/player.png");
         let floortile = read_image("assets/floortile.png");
+        let walltile = read_image("assets/walltile.png");
         let mut tiles = HashMap::new();
         tiles.insert(Tile::Floor, floortile);
-        tiles.insert(Tile::Wall, vec![0xFF_00_00_00; 32 * 32]);
+        tiles.insert(Tile::Wall, walltile);
         SpriteData {
             player: player,
             tiles: tiles
