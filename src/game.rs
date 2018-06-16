@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use image;
 use image::{GenericImage, Pixel};
 use minifb::{Key};
+use rand::{thread_rng, Rng};
 
 use tiles::{Tile, TileGrid};
 
@@ -97,12 +98,14 @@ impl Game {
     pub fn new(width: usize, height: usize) -> Self {
         let grid = TileGrid::random(width, height);
         let sprite_d = SpriteData::from_files();
+        let mut rng = thread_rng();
         let mut positions = Vec::with_capacity(width * height);
         for w in 0..width {
             for h in 0..height {
                 positions.push((h, w));
             }
         }
+        rng.shuffle(&mut positions);
         let player_pos = positions.into_iter()
             .find(|(r, c)| grid.tiles[r * width + c] == Tile::Floor)
             .unwrap(); // the map will always generate floor tiles
