@@ -1,9 +1,7 @@
 use std::collections::HashMap;
 
-extern crate image;
+use image;
 use image::{GenericImage, Pixel};
-
-extern crate minifb;
 use minifb::{Key};
 
 use tiles::{Tile, TileGrid};
